@@ -14,10 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Caso uses collectstatic e tenhas STATIC_ROOT configurado no settings.py:
-# RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8080
 
-# Substitui "agenda.wsgi:application" caso o teu ficheiro wsgi.py esteja noutro pacote
 CMD ["gunicorn", "agenda.wsgi:application", "--bind", "0.0.0.0:8080", "--workers", "2"]
