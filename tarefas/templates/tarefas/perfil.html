@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Agenda Escolar</title>
+    <link rel="stylesheet" href="{% static 'tarefas/style.css' %}">
+    <link rel="stylesheet" href="{% static 'tarefas/card.css' %}">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            {% if perfil.imagem_fundo %}
+                background: url('{{ perfil.imagem_fundo.url }}') no-repeat center center fixed;
+                background-size: cover;
+            {% endif %}
+        }
+        .perfil-card {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+        .perfil-card h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .avatar-box {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .avatar-box img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ff477e;
+        }
+        .avatar-placeholder {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #444;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            border: 3px solid #ff477e;
+        }
+        .campo {
+            margin-bottom: 15px;
+        }
+        .campo label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .campo input[type="text"], .campo input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: white;
+            box-sizing: border-box;
+        }
+        .btn-salvar {
+            width: 100%;
+            background: #ff477e;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        .btn-salvar:hover {
+            background: #e03b6d;
+        }
+        .btn-voltar {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .btn-voltar:hover {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="perfil-card">
+        <h2>Meu Perfil</h2>
+
+        <!-- Foto ou Iniciais do Usuário -->
+        <div class="avatar-box">
+            {% if perfil.foto_perfil %}
+                <img src="{{ perfil.foto_perfil.url }}" alt="Foto de Perfil">
+            {% else %}
+                <div class="avatar-placeholder">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Formulário -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="campo">
+                <label>Nome de Usuário:</label>
+                <input type="text" name="username" value="{{ user.username }}" required>
+            </div>
+
+            <div class="campo">
+                <label>Alterar Foto de Perfil:</label>
+                <input type="file" name="foto_perfil" accept="image/*">
+            </div>
+
+            <div class="campo">
+                <label>Alterar Imagem de Fundo (Wallpaper):</label>
+                <input type="file" name="imagem_fundo" accept="image/*">
+            </div>
+
+            <button type="submit" class="btn-salvar">Salvar Alterações</button>
+        </form>
+
+        <a href="{% url 'dashboard' %}" class="btn-voltar">← Voltar para o Dashboard</a>
+    </div>
+
+</body>
+</html>

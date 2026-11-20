@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'tarefas/login.css' %}">
+</head>
+<body>
+
+<div class="container-split">
+
+    <!-- Lado Esquerdo: Espaço para a imagem que você vai adicionar -->
+    <div class="left-image-side">
+        <!-- Substitua o src abaixo pela imagem que desejar colocar na esquerda -->
+        <img src="{% static 'tarefas/img/logo.jpeg' %}" alt="Banner Lateral" class="side-image">
+    </div>
+
+    <!-- Lado Direito: Formulário de Login com visual em cinza escuro -->
+    <div class="right-login-side">
+
+        <div class="logo-container">
+            <img src="{% static 'tarefas/img/icone.jpg' %}" alt="Logo" class="logo">
+            <span style="font-weight: bold; font-size: 18px; color: #fff;">Minha Agenda</span>
+        </div>
+
+        <h1>Login</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>Usuário</label>
+            {{ form.username }}
+
+            <label>Senha</label>
+            {{ form.password }}
+
+            {% if form.errors %}
+                <p style="color:#ff477e; margin-bottom:15px; font-size: 13px;">
+                    Usuário ou senha incorretos.
+                </p>
+            {% endif %}
+
+            <button type="submit">
+                Entrar
+            </button>
+
+            <p style="margin-top:20px; color: #b0b8c4; font-size: 14px;">
+                Não possui uma conta?
+                <br>
+                <a href="{% url 'cadastro' %}">Criar uma conta</a>
+            </p>
+
+        </form>
+        
+    </div>
+
+</div>
+
+</body>
+</html>

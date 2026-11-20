@@ -1,0 +1,171 @@
+/* RESET */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* BODY com o degradê escuro imersivo */
+body{
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at 10% 20%, #080b11 0%, #030508 40%, #101935 70%, #3d0c2c 100%);
+    background-attachment: fixed;
+    color: #fff;
+    padding: 20px;
+}
+
+/* CONTAINER PRINCIPAL DIVIDIDO EM 2 COLUNAS */
+.container-split {
+    width: 100%;
+    max-width: 900px;
+    height: 520px;
+    background: #161b22; /* Cinza escuro moderno */
+    border-radius: 25px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* LADO ESQUERDO: Imagem */
+.left-image-side {
+    flex: 1;
+    background: #101935;
+    position: relative;
+    overflow: hidden;
+}
+
+.side-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* LADO DIREITO: Painel de Login */
+.right-login-side {
+    flex: 1.1;
+    background: #161b22;
+    padding: 40px 45px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* LOGO NO TOPO DO FORMULÁRIO */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #0077b6;
+    background: #080b11;
+}
+
+.right-login-side h1 {
+    color: #ffffff;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+/* FORM */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: #b0b8c4;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+input {
+    width: 100%;
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    background: #21262d;
+    color: #ffffff;
+    padding: 0 15px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    outline: none;
+    border: 1px solid #30363d;
+    transition: .3s;
+}
+
+input:focus {
+    background: #30363d;
+    border-color: #0077b6;
+}
+
+/* Botão em Rosa Vibrante (#ff477e) */
+button {
+    width: 100%;
+    height: 45px;
+    border: none;
+    border-radius: 10px;
+    background: #ff477e;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .3s;
+    margin-top: 10px;
+    box-shadow: 0 4px 10px rgba(255,71,126,0.3);
+}
+
+button:hover {
+    background: #c9184a;
+    transform: translateY(-2px);
+}
+
+a {
+    display: inline-block;
+    margin-top: 5px;
+    text-decoration: none;
+    color: #38bdf8;
+    font-weight: bold;
+    transition: .3s;
+}
+
+a:hover {
+    color: #ff477e;
+    text-decoration: underline;
+}
+
+/* RESPONSIVIDADE PARA TELEMÓVEIS */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+    .container-split {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        flex-direction: column;
+    }
+    .left-image-side {
+        display: none; /* Oculta a imagem lateral em telas pequenas para caber o formulário */
+    }
+    .right-login-side {
+        padding: 30px 20px;
+        height: 100%;
+        justify-content: center;
+    }
+}
