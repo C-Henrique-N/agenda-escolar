@@ -1,0 +1,30 @@
+# fly.toml app configuration file generated for agenda-escolar-bpqfaw on 2026-11-20T04:36:08Z
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
+
+app = 'agenda-escolar-bpqfaw'
+primary_region = 'iad'
+console_command = '/code/manage.py shell'
+
+[build]
+[env]
+  PORT = '8000'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
+
+[[statics]]
+  guest_path = '/code/static'
+  url_prefix = '/static/'
