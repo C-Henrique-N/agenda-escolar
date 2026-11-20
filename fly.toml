@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for agenda-escolar-bpqfaw on 2026-11-20T04:36:08Z
+# fly.toml app configuration file generated for agenda-escolar--t4nwa on 2026-11-20T04:44:27Z
 #
 # See https://docs.fly.io/reference/configuration for information about how to use this file.
 #
 
-app = 'agenda-escolar-bpqfaw'
-primary_region = 'iad'
+app = 'agenda-escolar--t4nwa'
+primary_region = 'ams'
 console_command = '/code/manage.py shell'
 
 [build]
