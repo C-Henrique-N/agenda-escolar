@@ -30,15 +30,15 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = [
-    'agenda-escolar-ye-8hq.fly.dev',
+    'agenda-escolar-bpqfaw.fly.dev',
+    '.fly.dev',
     'localhost',
     '127.0.0.1',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://agenda-escolar-ye-8hq.fly.dev',
+    'https://agenda-escolar-bpqfaw.fly.dev',
 ]
-
 
 # Application definition
 
