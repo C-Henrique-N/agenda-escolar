@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Escolar</title>
+    <link rel="stylesheet" href="{% static 'tarefas/style.css' %}">
+    <link rel="stylesheet" href="{% static 'tarefas/card.css' %}">
+    <style>
+        /* RESET E CORPO */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body.Dashboard-page {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: #fff;
+            padding: 30px 15px;
+        }
+
+        /* WRAPPER PRINCIPAL CENTRALIZADO */
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 850px; /* Limita a largura para não esticar demais */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* TOPO / CABEÇALHO */
+        .topo-painel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: rgba(16, 25, 53, 0.9);
+            padding: 18px 25px;
+            border-radius: 16px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        /* BLOCOS / CONTAINERS EM CINZA ESCURO */
+        .painel-container {
+            background: #161b22;
+            color: #fff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .painel-container h2 {
+            color: #fff;
+            margin-bottom: 18px;
+            font-size: 20px;
+            border-bottom: 2px solid #21262d;
+            padding-bottom: 8px;
+        }
+
+        .painel-container label {
+            color: #b0b8c4;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+            margin-top: 10px;
+        }
+
+        /* INPUTS COM TAMANHO EQUILIBRADO */
+        .painel-container input, 
+        .painel-container select {
+            width: 100%;
+            padding: 10px 15px;
+            background: #21262d;
+            color: #fff;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .painel-container input:focus, 
+        .painel-container select:focus {
+            border-color: #0077b6;
+            background: #30363d;
+        }
+
+        /* GRID DE MATÉRIAS E TAREFAS */
+        .grid-materias {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .grid-tarefas {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .card-item {
+            background: #21262d;
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-left: 5px solid #0077b6;
+        }
+        .card-item.alta, .card-item.urgente { border-left-color: #ff477e; }
+        .card-item.média { border-left-color: #ffc107; }
+        .card-item.baixa { border-left-color: #28a745; }
+
+        /* BOTÕES */
+        .botao-acao {
+            background: #ff477e; 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 15px;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(255,71,126,0.3);
+            width: 100%;
+            margin-top: 15px;
+        }
+        .botao-acao:hover {
+            background: #c9184a;
+            transform: translateY(-2px);
+        }
+
+        .acoes-tarefa {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .acoes-tarefa a {
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-concluir { background: #198754; color: #fff; }
+        .btn-concluir:hover { background: #157347; }
+        
+        .btn-excluir { background: #ff477e; color: #fff; }
+        .btn-excluir:hover { background: #c9184a; }
+    </style>
+</head>
+<body class="Dashboard-page" style="{% if perfil and perfil.imagem_fundo %}background: url('{{ perfil.imagem_fundo.url }}') no-repeat center center fixed; background-size: cover;{% else %}background: radial-gradient(circle at 10% 20%, #080b11 0%, #030508 40%, #101935 70%, #3d0c2c 100%); background-attachment: fixed;{% endif %}">
+
+    <div class="dashboard-wrapper">
+
+        <!-- Topo / Cabeçalho -->
+        <div class="topo-painel">
+            <h1 style="font-size: 22px; margin: 0;">Minha Agenda Escolar</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                
+                <a href="{% url 'perfil' %}" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; transition: 0.3s;">
+                    {% if perfil and perfil.foto_perfil %}
+                        <img src="{{ perfil.foto_perfil.url }}" alt="Perfil" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 2px solid #0077b6;">
+                    {% endif %}
+                    <span>Olá, <strong>{{ user.username }}</strong></span>
+                </a>
+                
+                <form action="{% url 'logout' %}" method="POST" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" style="background-color: #ff477e; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(255,71,126,0.3);">Sair</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Seção: Cadastrar Matéria -->
+        <div class="painel-container">
+            <h2>Cadastrar Matéria</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="cadastrar_materia" value="1">
+                <label>Nome da matéria:</label>
+                <input type="text" name="nome" required>
+                <label>Professor:</label>
+                <input type="text" name="professor">
+                <button type="submit" class="botao-acao" style="width: auto; padding: 10px 25px;">Cadastrar Matéria</button>
+            </form>
+        </div>
+
+        <!-- Seção: Minhas Matérias -->
+        <div class="painel-container">
+            <h2>Minhas Matérias</h2>
+            <div class="grid-materias">
+                {% for materia in materias %}
+                    <div class="card-item">
+                        <h3 style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px;">{{ materia.nome }}</h3>
+                        <p style="margin: 0; color: #b0b8c4; font-size: 13px;">Professor: {{ materia.professor|default:"Não informado" }}</p>
+                    </div>
+                {% empty %}
+                    <p style="color: #8b949e; font-size: 14px;">Nenhuma matéria cadastrada.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Seção: Adicionar Tarefa -->
+        <div class="painel-container">
+            <h2>Adicionar Tarefa</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="cadastrar_tarefa" value="1">
+
+                <label>Título:</label>
+                <input type="text" name="titulo" required>
+
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label>Matéria / Disciplina:</label>
+                        <select name="materia" required>
+                            <option value="" style="background: #161b22; color: #fff;">Selecione uma matéria</option>
+                            {% for materia in materias %}
+                                <option value="{{ materia.id }}" style="background: #161b22; color: #fff;">{{ materia.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label>Tipo de Avaliação:</label>
+                        <select name="tipo">
+                            <option value="Tarefa" style="background: #161b22; color: #fff;">Tarefa</option>
+                            <option value="Trabalho" style="background: #161b22; color: #fff;">Trabalho</option>
+                            <option value="Prova" style="background: #161b22; color: #fff;">Prova</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label>Data:</label>
+                        <input type="date" name="data" required>
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label>Horário:</label>
+                        <input type="time" name="horario">
+                    </div>
+                </div>
+
+                <label>Prioridade:</label>
+                <select name="prioridade">
+                    <option value="Baixa" style="background: #161b22; color: #fff;">Baixa</option>
+                    <option value="Média" style="background: #161b22; color: #fff;">Média</option>
+                    <option value="Alta" style="background: #161b22; color: #fff;">Alta</option>
+                    <option value="Urgente" style="background: #161b22; color: #fff;">Urgente</option>
+                </select>
+
+                <button type="submit" class="botao-acao">Adicionar Tarefa</button>
+            </form>
+        </div>
+
+        <!-- Seção: Lista de Tarefas -->
+        <div class="painel-container">
+            <h2>Lista de Tarefas</h2>
+
+            <div class="grid-tarefas">
+                {% for tarefa in tarefas %}
+                    <div class="card-item {{ tarefa.prioridade|lower }}">
+                        <h3 style="margin: 0 0 8px 0; color: #fff; font-size: 17px;">{{ tarefa.titulo }}</h3>
+                        <p style="margin: 4px 0; font-size: 14px; color: #b0b8c4;"><strong>Tipo:</strong> {{ tarefa.tipo }}</p>
+                        <p style="margin: 4px 0; font-size: 14px; color: #b0b8c4;"><strong>Matéria:</strong> {% if tarefa.materia %}{{ tarefa.materia.nome }}{% else %}Não informada{% endif %}</p>
+                        <p style="margin: 4px 0; font-size: 14px; color: #b0b8c4;"><strong>Data:</strong> {{ tarefa.data|date:"d/m/Y" }} {% if tarefa.horario %}- {{ tarefa.horario|time:"H:i" }}{% endif %}</p>
+                        <p style="margin: 4px 0; font-size: 14px; color: #b0b8c4;"><strong>Prioridade:</strong> {{ tarefa.get_prioridade_display|default:tarefa.prioridade }}</p>
+                        <p style="margin: 4px 0; font-size: 14px; color: #b0b8c4;"><strong>Status:</strong> {% if tarefa.concluido or tarefa.concluida %}Concluída ✅{% else %}Pendente ⏳{% endif %}</p>
+
+                        <div class="acoes-tarefa">
+                            {% if not tarefa.concluido and not tarefa.concluida %}
+                                <a href="{% url 'concluir_tarefa' tarefa.id %}" class="btn-concluir">✔ Concluir</a>
+                            {% endif %}
+                            <a href="{% url 'excluir_tarefa' tarefa.id %}" class="btn-excluir">✖ Excluir</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p style="color: #8b949e; font-size: 14px;">Nenhuma tarefa cadastrada.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

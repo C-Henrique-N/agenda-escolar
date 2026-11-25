@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <link rel="stylesheet" href="{% static 'tarefas/cadastro.css' %}">
+</head>
+<body>
+
+<div class="container-split">
+
+    <!-- Lado Esquerdo: Imagem lateral -->
+    <div class="left-image-side">
+        <!-- Coloque aqui a imagem que deseja exibir na esquerda -->
+        <img src="{% static 'tarefas/img/logo.jpeg' %}" alt="Banner Lateral" class="side-image">
+    </div>
+
+    <!-- Lado Direito: Formulário de Cadastro em Cinza Escuro -->
+    <div class="right-form-side">
+
+        <div class="logo-container">
+            <img src="{% static 'tarefas/img/icone.jpg' %}" alt="Logo" class="logo">
+            <span style="font-weight: bold; font-size: 18px; color: #fff;">Minha Agenda</span>
+        </div>
+
+        <h1>Criar uma Conta</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>Nome do usuário</label>
+            {{ form.username }}
+
+            <label>Senha</label>
+            {{ form.password1 }}
+
+            <label>Confirmar senha</label>
+            {{ form.password2 }}
+
+            <button type="submit">
+                Cadastrar
+            </button>
+
+        </form>
+
+        <p style="margin-top:15px; text-align:center; color: #b0b8c4; font-size: 14px;">
+            Você já possui uma conta?
+            <a href="{% url 'login' %}">Entrar</a>
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+</html>
