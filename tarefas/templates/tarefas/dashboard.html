@@ -1,0 +1,2524 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Escolar</title>
+    <link rel="stylesheet" href="{% static 'tarefas/style.css' %}">
+    <link rel="stylesheet" href="{% static 'tarefas/card.css' %}">
+    <style>
+        :root {
+            --bg-base: #070311;
+            --bg-sidebar: #090414;
+            --bg-card: #120826;
+            --bg-card-2: #190c33;
+            --border-card: rgba(155, 92, 255, 0.24);
+            --purple: #8b3dff;
+            --purple-bright: #a855f7;
+            --green: #22c55e;
+            --text-main: #f8fafc;
+            --text-muted: #9f90c2;
+        }
+
+        body.theme-light {
+            --bg-base: #f3effb;
+            --bg-sidebar: #ebe4fa;
+            --bg-card: #ffffff;
+            --bg-card-2: #f7f3ff;
+            --border-card: rgba(139, 61, 255, 0.22);
+            --text-main: #150b29;
+            --text-muted: #5d4f7a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+        }
+
+        body.app-body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 12% 8%, rgba(139, 61, 255, 0.18), transparent 40%),
+                radial-gradient(circle at 88% 12%, rgba(168, 85, 247, 0.14), transparent 42%),
+                var(--bg-base);
+            color: var(--text-main);
+            display: flex;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            min-height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 18px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            flex-shrink: 0;
+            z-index: 20;
+        }
+
+        .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 8px 18px;
+        }
+
+        .brand-kiwi-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #c8f560, #5b8c18 65%, #2b1447 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 0 14px rgba(139, 61, 255, 0.35);
+        }
+
+        .brand-title {
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-crown {
+            font-size: 13px;
+            color: #facc15;
+        }
+
+        .side-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .side-item-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+
+        .side-item-btn:hover {
+            color: var(--text-main);
+            background: rgba(139, 61, 255, 0.12);
+        }
+
+        .side-item-btn.active {
+            color: #ffffff;
+            font-weight: 600;
+            background: linear-gradient(90deg, #8b3dff, #9d4edd);
+            box-shadow: 0 6px 20px rgba(139, 61, 255, 0.38);
+        }
+
+        .side-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .premium-box {
+            border-radius: 16px;
+            padding: 14px;
+            background: linear-gradient(160deg, rgba(88, 28, 135, 0.35), rgba(22, 10, 44, 0.92));
+            border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+
+        .premium-box-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #facc15;
+            margin-bottom: 4px;
+        }
+
+        .premium-box-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.35;
+            margin-bottom: 10px;
+        }
+
+        .premium-btn {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(90deg, #8b3dff, #a855f7);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .online-pill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .online-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot-green {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .logout-mini-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 18px 24px 72px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-view {
+            display: none;
+        }
+
+        .tab-view.active {
+            display: block;
+        }
+
+        /* HERO BANNER */
+        .hero-banner {
+            position: relative;
+            height: 146px;
+            border-radius: 22px;
+            padding: 0 26px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(168, 85, 247, 0.32);
+            background:
+                linear-gradient(90deg, rgba(10, 5, 22, 0.86) 0%, rgba(45, 16, 94, 0.45) 50%, rgba(10, 5, 22, 0.72) 100%),
+                radial-gradient(circle at 65% 35%, rgba(168, 85, 247, 0.55), rgba(24, 10, 52, 0.95));
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .hero-user-group {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            z-index: 2;
+        }
+
+        .hero-avatar-box {
+            position: relative;
+            width: 84px;
+            height: 84px;
+            flex-shrink: 0;
+        }
+
+        .hero-avatar-img {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #a855f7;
+            box-shadow: 0 0 22px rgba(168, 85, 247, 0.45);
+        }
+
+        .hero-avatar-fallback {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #c084fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 800;
+            color: #fff;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .hero-online-dot {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            background: var(--green);
+            border: 3px solid #130829;
+        }
+
+        .hero-edit-circle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #130829;
+            background: #8b3dff;
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .hero-name-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hero-name-line h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .hero-check-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #8b3dff;
+            color: #fff;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-bio {
+            font-size: 14px;
+            color: #e9d5ff;
+            margin-top: 4px;
+        }
+
+        .hero-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2;
+        }
+
+        .icon-circle-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(15, 7, 32, 0.72);
+            color: #f8fafc;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-edit-banner {
+            padding: 9px 14px;
+            border-radius: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(15, 7, 32, 0.78);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* INÍCIO LAYOUT (2ª IMAGEM) */
+        .inicio-layout {
+            display: grid;
+            grid-template-columns: 330px 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .inicio-left, .inicio-right {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .date-card {
+            border-radius: 18px;
+            padding: 18px 20px;
+            border: 1px solid rgba(168, 85, 247, 0.32);
+            background:
+                radial-gradient(circle at 92% 65%, rgba(168, 85, 247, 0.26), transparent 45%),
+                linear-gradient(120deg, rgba(67, 20, 128, 0.45), rgba(18, 8, 38, 0.95));
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .date-icon-sq {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #8b3dff, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .date-sub {
+            font-size: 12px;
+            color: #d8b4fe;
+        }
+
+        .date-weekday {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin: 2px 0;
+        }
+
+        .date-greet {
+            font-size: 13px;
+            color: #e9d5ff;
+        }
+
+        .card-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            padding: 18px 20px;
+        }
+
+        .cal-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .cal-title {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .cal-arrow {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .cal-dow, .cal-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+        }
+
+        .cal-dow {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .cal-days {
+            row-gap: 4px;
+        }
+
+        .cal-day {
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .cal-day.faded {
+            color: rgba(159, 144, 194, 0.35);
+        }
+
+        .cal-day.selected {
+            background: #8b3dff;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .motivate-card {
+            border-radius: 18px;
+            padding: 18px 20px;
+            border: 1px solid rgba(168, 85, 247, 0.32);
+            background:
+                radial-gradient(circle at 92% 55%, rgba(168, 85, 247, 0.25), transparent 45%),
+                linear-gradient(120deg, rgba(88, 28, 135, 0.42), rgba(18, 8, 38, 0.95));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .motivate-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .motivate-card p {
+            font-size: 12px;
+            color: #ddd6fe;
+            line-height: 1.4;
+        }
+
+        .tasks-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .tasks-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tasks-check-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #8b3dff;
+            color: #fff;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tasks-panel-title h2 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .see-all-btn {
+            background: transparent;
+            border: none;
+            color: #a855f7;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .task-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-row-card {
+            background: var(--bg-card-2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: 0.15s ease;
+        }
+
+        .task-row-card:hover {
+            border-color: rgba(168, 85, 247, 0.35);
+        }
+
+        .task-row-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .check-circle-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(168, 85, 247, 0.55);
+            background: transparent;
+            color: #fff;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .check-circle-btn.completed {
+            background: #8b3dff;
+            border-color: #8b3dff;
+        }
+
+        .task-row-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .task-row-name.completed {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-row-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .task-row-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .badge-status {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(139, 61, 255, 0.22);
+            color: #d8b4fe;
+        }
+
+        .badge-status.completed {
+            background: rgba(34, 197, 94, 0.16);
+            color: #4ade80;
+        }
+
+        .task-actions { position: relative; flex-shrink: 0; }
+        .dots-del-btn {
+            list-style: none; cursor: pointer; color: var(--text-muted);
+            font-size: 20px; line-height: 1; padding: 5px 9px;
+            border-radius: 9px; user-select: none;
+        }
+        .dots-del-btn::-webkit-details-marker { display: none; }
+        .dots-del-btn:hover, .task-actions[open] > .dots-del-btn {
+            color: var(--text-main, #fff); background: rgba(139, 61, 255, .16);
+        }
+        .task-actions-menu {
+            position: absolute; z-index: 50; top: calc(100% + 6px); right: 0;
+            min-width: 155px; padding: 6px; border: 1px solid var(--border-card);
+            border-radius: 12px; background: var(--bg-card, #171321);
+            box-shadow: 0 12px 30px rgba(0,0,0,.28);
+        }
+        .task-actions-menu a, .task-actions-menu button {
+            display: flex; width: 100%; align-items: center; gap: 8px;
+            padding: 9px 10px; border: 0; border-radius: 8px;
+            background: transparent; color: var(--text-main, #fff);
+            text-decoration: none; text-align: left; font: inherit;
+            font-size: 13px; cursor: pointer;
+        }
+        .task-actions-menu a:hover, .task-actions-menu button:hover { background: rgba(139,61,255,.16); }
+        .task-actions-menu .delete-task-action { color: #f87171; }
+
+        .mini-kpis-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .mini-kpi {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            padding: 15px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 74px;
+        }
+
+        .mini-kpi-num {
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .mini-kpi-lbl {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* PERFIL LAYOUT (1ª IMAGEM) */
+        .perfil-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.25fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .perfil-col {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .box-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .box-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .btn-pill-edit {
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .info-list-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-list-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-lbl-sm {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .info-val-md {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .sobre-text {
+            font-size: 14px;
+            line-height: 1.55;
+            color: #e2e8f0;
+            margin-bottom: 14px;
+        }
+
+        .tags-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag-chip {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(139, 61, 255, 0.22);
+            color: #d8b4fe;
+        }
+
+        .stats-4-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .stat-box-tile {
+            background: var(--bg-card-2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 14px 8px;
+            text-align: center;
+        }
+
+        .stat-box-num {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 6px 0 2px;
+        }
+
+        .stat-box-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .conquistas-4-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .conquista-tile {
+            background: var(--bg-card-2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 14px 8px;
+            text-align: center;
+        }
+
+        .conquista-medal {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: rgba(139, 61, 255, 0.22);
+            border: 1px solid rgba(192, 132, 252, 0.35);
+        }
+
+        .conquista-name {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .conquista-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .prefs-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .pref-chip-box {
+            background: var(--bg-card-2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 11px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .inline-edit-form {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: none;
+        }
+
+        .inline-edit-form.open {
+            display: block;
+        }
+
+        .field-in {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            background: rgba(10, 4, 22, 0.9);
+            color: #fff;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .btn-save-purple {
+            padding: 9px 16px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(90deg, #8b3dff, #a855f7);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* ESTATISTICAS & RANKING & AGENDA & MAIS */
+        .stats-4-top {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .bars-week {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            align-items: end;
+            height: 150px;
+            padding-top: 12px;
+        }
+
+        .bar-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .bar-bg {
+            width: 100%;
+            max-width: 30px;
+            height: 105px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .bar-val {
+            width: 100%;
+            background: linear-gradient(180deg, #c084fc, #8b3dff);
+        }
+
+        .rank-row {
+            display: grid;
+            grid-template-columns: 44px 1fr auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 13px;
+            background: var(--bg-card-2);
+            margin-bottom: 8px;
+        }
+
+        .rank-row.me {
+            border: 1px solid #a855f7;
+            background: rgba(139, 61, 255, 0.25);
+        }
+
+        .fab-plus {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #8b3dff, #a855f7);
+            color: #fff;
+            font-size: 26px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 61, 255, 0.45);
+            z-index: 30;
+        }
+
+        @media (max-width: 1050px) {
+            .inicio-layout, .perfil-layout, .mini-kpis-4, .stats-4-grid, .conquistas-4-grid, .stats-4-top, .prefs-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        .inicio-rank-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(139, 61, 255, 0.24), rgba(26, 17, 45, 0.96));
+            border: 1px solid rgba(168, 85, 247, 0.42);
+            cursor: pointer;
+            transition: transform 0.16s ease, border-color 0.16s ease;
+            margin-top: 14px;
+            text-align: left;
+            width: 100%;
+        }
+        .inicio-rank-banner:hover {
+            transform: translateY(-2px);
+            border-color: #c084fc;
+        }
+        .rank-emblem-img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .rank-emblem-md {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .rank-emblem-lg {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+        }
+        .rank-not-obtainable {
+            font-size: 11px;
+            font-weight: 700;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.14);
+            border: 1px solid rgba(251, 191, 36, 0.38);
+            padding: 3px 9px;
+            border-radius: 999px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .rank-gift-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #f3e8ff;
+            background: rgba(139, 61, 255, 0.35);
+            border: 1px solid rgba(192, 132, 252, 0.5);
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-left: 6px;
+        }
+        .ranking-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+        .ranking-filter-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: var(--bg-card-2);
+            padding: 6px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .ranking-pill-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 12.5px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .ranking-pill-btn.active {
+            background: var(--purple);
+            color: #fff;
+        }
+        .ranking-main-split {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 22px;
+        }
+        .rank-showcase-card {
+            background: linear-gradient(160deg, rgba(139, 61, 255, 0.25), rgba(22, 14, 39, 0.96));
+            border: 1px solid rgba(168, 85, 247, 0.45);
+            border-radius: 18px;
+            padding: 22px;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .rank-levels-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .rank-level-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: var(--bg-card-2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .ranks-tier-strip {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 10px;
+            margin: 14px 0 18px;
+        }
+        .rank-tier-card {
+            background: var(--bg-card-2);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 12px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .rank-tier-card.current-rank {
+            background: linear-gradient(180deg, rgba(139, 61, 255, 0.34), rgba(33, 21, 58, 0.95));
+            border-color: #c084fc;
+            box-shadow: 0 0 20px rgba(139, 61, 255, 0.28);
+        }
+        .ranking-bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 18px;
+            align-items: start;
+        }
+        @media (max-width: 1200px) {
+            .ranks-tier-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+        @media (max-width: 1050px) {
+            .ranking-main-split, .ranking-bottom-grid, .rank-levels-two-col { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .ranks-tier-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+    
+.rank-badge-img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    vertical-align: middle;
+    border-radius: 8px;
+}
+
+.rank-hero-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.rank-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.rank-progress-wrap {
+    margin-top: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.rank-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--purple-bright));
+    border-radius: 999px;
+}
+
+.ranks-trilha-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.rank-level-card {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rank-admin-alert {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+    
+.msg-toast-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.msg-toast-item {
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: rgba(139, 61, 255, 0.22);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 600;
+}
+.inicio-rank-card {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.inicio-rank-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.mobile-menu-btn {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    border: 1px solid var(--border-card);
+    background: var(--bg-card-2);
+    color: var(--text-main);
+    font-size: 20px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 2, 10, 0.65);
+    z-index: 25;
+}
+.sidebar-backdrop.open {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    body.app-body {
+        flex-direction: column;
+        overflow-x: hidden;
+    }
+    .mobile-menu-btn {
+        display: inline-flex;
+    }
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        bottom: 0;
+        width: 240px;
+        min-height: 100vh;
+        transition: left 0.22s ease;
+        z-index: 40;
+    }
+    .sidebar.open {
+        left: 0;
+    }
+    .main-content, .content-area, main {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 12px !important;
+        margin-left: 0 !important;
+    }
+    .inicio-layout,
+    .perfil-layout,
+    .ranking-main-split,
+    .ranking-bottom-grid,
+    .rank-levels-two-col,
+    .mini-kpis-4,
+    .stats-4-grid,
+    .conquistas-4-grid,
+    .stats-4-top,
+    .prefs-row {
+        grid-template-columns: 1fr !important;
+    }
+    .rank-row {
+        grid-template-columns: 44px 1fr auto auto !important;
+        gap: 8px !important;
+        padding: 10px !important;
+        font-size: 13px;
+    }
+    .rank-hero-box,
+    .inicio-rank-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .fab-plus {
+        right: 16px;
+        bottom: 16px;
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+}
+
+    
+/* Polimento extra para celular e formulários de perfil/senha */
+@media (max-width: 768px) {
+    .brand-top, .sidebar-footer, .nav-list {
+        width: 100%;
+    }
+    .card-box {
+        padding: 14px !important;
+        border-radius: 14px !important;
+    }
+    .box-header-row {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .field-in {
+        width: 100%;
+        font-size: 14px;
+    }
+    .btn-save-purple, .btn-pill-edit {
+        max-width: 100%;
+    }
+}
+@media (max-width: 480px) {
+    .rank-row {
+        grid-template-columns: 36px 1fr auto !important;
+    }
+    .rank-row > strong:last-child {
+        grid-column: 1 / -1;
+        justify-self: end;
+    }
+}
+
+    .mobile-topbar-row { display: none; align-items: center; gap: 10px; margin-bottom: 10px; }
+@media (max-width: 768px) { .mobile-topbar-row { display: flex; } }
+
+        /* Ajustes responsivos das novas seções */
+        .task-form-three { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:14px; }
+        .task-form-two { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:10px 0; }
+        .cat-grid-6 { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+        .cat-tile-btn { min-width:0; padding:12px 8px; border-radius:12px; border:1px solid rgba(155,92,255,.22); background:var(--bg-card-2); color:var(--text-main); font-size:19px; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; }
+        .cat-tile-btn span { font-size:12px; }
+        .cat-tile-btn.active { border-color:#a855f7; background:linear-gradient(135deg,#7c3aed,#9333ea); color:#fff; }
+        .task-options-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:12px 0 18px; }
+        .task-options-grid label { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:12px; background:var(--bg-card-2); border:1px solid rgba(155,92,255,.2); cursor:pointer; }
+        .task-options-grid small { display:block; color:var(--text-muted); font-size:11px; margin-top:3px; }
+        .task-options-grid input { width:18px; height:18px; accent-color:#9333ea; flex-shrink:0; }
+        .stats-heading { margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; background:linear-gradient(135deg,rgba(139,61,255,.22),var(--bg-card)); }
+        .stats-visual-grid { margin-bottom:16px; }
+        .stats-visual-card { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:112px; }
+        .stats-visual-card strong { font-size:25px; display:block; margin-bottom:7px; }
+        .stats-spark { color:#c084fc; font-size:46px; line-height:1; }
+        .stats-content-grid { display:grid; grid-template-columns:1.55fr 1fr; gap:16px; }
+        .stats-card-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+        .stats-category-list { display:flex; flex-direction:column; gap:12px; }
+        .stats-category-list > div,.stats-summary-line { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13px; }
+        .stats-category-list span { display:flex; align-items:center; gap:8px; }
+        .stats-category-list i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+        .stats-summary-line { margin:12px 0 6px; }
+        .stats-progress { height:8px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; }
+        .stats-progress i { height:100%; display:block; background:linear-gradient(90deg,#8b3dff,#c084fc); }
+        .stats-best-day { text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        .stats-best-icon { width:66px; height:66px; border-radius:50%; background:radial-gradient(circle,rgba(168,85,247,.45),rgba(139,61,255,.12)); display:flex; align-items:center; justify-content:center; font-size:30px; margin:12px 0; }
+        .settings-account-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:stretch; }
+        .settings-account-grid > .card-box { display:flex; flex-direction:column; }
+        .settings-info-row { padding:12px; border-radius:12px; background:var(--bg-card-2); margin-bottom:10px; border-bottom:0; }
+        .settings-icon { width:36px; height:36px; border-radius:10px; background:rgba(139,61,255,.22); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .password-change-form { display:flex; flex-direction:column; gap:10px; margin-top:auto; }
+        .password-change-form .field-in { margin:0; }
+        @media (max-width: 760px) {
+            .task-form-three,.task-form-two,.settings-account-grid,.stats-content-grid { grid-template-columns:1fr; }
+            .cat-grid-6 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+            .task-options-grid { grid-template-columns:1fr; }
+            .stats-heading { align-items:flex-start; }
+        }
+    
+
+        /* Mídia de banner: imagens/GIFs como fundo e vídeos como vídeo real. */
+        .hero-banner-video,
+        .hero-banner-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .hero-banner-media-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(90deg, rgba(10, 5, 22, .82) 0%, rgba(45, 16, 94, .42) 55%, rgba(10, 5, 22, .72) 100%);
+            pointer-events: none;
+        }
+        .hero-banner > *:not(.hero-banner-video):not(.hero-banner-image):not(.hero-banner-media-overlay) {
+            position: relative;
+            z-index: 2;
+        }
+
+
+/* Navegação e acabamento responsivo para celulares */
+.mobile-current-tab {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (max-width: 768px) {
+    .main-content { padding: 10px 10px 88px !important; }
+    .hero-banner {
+        min-height: 132px;
+        height: auto;
+        padding: 18px 14px;
+        margin-bottom: 8px;
+        border-radius: 18px;
+    }
+    .hero-user-group { gap: 10px; min-width: 0; }
+    .hero-avatar-box { flex-shrink: 0; }
+    .hero-name-line h1 { font-size: clamp(20px, 5vw, 28px); overflow-wrap: anywhere; }
+    .hero-bio { font-size: 13px; line-height: 1.35; }
+    .hero-top-actions { gap: 6px; }
+    .mobile-topbar-row {
+        display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 22;
+        align-items: center;
+        gap: 12px;
+        min-height: 54px;
+        margin: 0 -10px 14px;
+        padding: 7px 12px;
+        background: var(--bg-base);
+        border-bottom: 1px solid rgba(168, 85, 247, .18);
+        box-shadow: 0 5px 14px rgba(0,0,0,.12);
+    }
+    .mobile-menu-btn { width: 44px; height: 42px; font-size: 22px; }
+    .card-box { padding: 14px !important; margin-bottom: 12px; }
+    .date-card { gap: 12px; padding: 14px !important; }
+    .date-weekday { font-size: clamp(21px, 5.5vw, 28px); }
+    .calendar-grid, .calendar-days { gap: 3px !important; }
+    .calendar-day { min-height: 38px; }
+    .task-form-three, .task-form-two, .task-options-grid,
+    .cat-grid-6, .stats-content-grid, .settings-account-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+    .box-header-row, .stats-heading, .stats-card-title { align-items: flex-start; }
+    .rank-row { min-width: 0; overflow-wrap: anywhere; }
+    .fab-plus { position: fixed; z-index: 18; right: 16px; bottom: 22px; }
+    input, select, textarea, button { max-width: 100%; }
+}
+@media (max-width: 480px) {
+    .hero-banner { min-height: 118px; padding: 14px 10px; }
+    .hero-avatar-box { width: 66px; height: 66px; }
+    .hero-avatar-img, .hero-avatar-fallback { width: 66px; height: 66px; }
+    .hero-name-line h1 { font-size: 20px; }
+    .hero-bio { font-size: 12px; }
+    .card-box h2, .card-box h3 { overflow-wrap: anywhere; }
+    .mobile-topbar-row { margin-bottom: 10px; }
+    .rank-row { grid-template-columns: 32px minmax(0, 1fr) auto !important; }
+}
+
+</style>
+</head>
+<body class="app-body">
+    <div class="sidebar-backdrop" id="js-sidebar-backdrop"></div>
+
+    <aside class="sidebar" id="js-sidebar">
+        <div>
+            <div class="brand-top">
+                <div class="brand-kiwi-icon">🥝</div>
+                <div class="brand-title">Kiwi</div>
+                <span class="brand-crown">👑</span>
+            </div>
+
+            <ul class="side-menu">
+                <li><button type="button" class="side-item-btn active" data-tab="inicio">🏠 Início</button></li>
+                <li><button type="button" class="side-item-btn" data-tab="agenda">📅 Agenda</button></li>
+                <li><button type="button" class="side-item-btn" data-tab="estatisticas">📊 Estatísticas</button></li>
+                <li><button type="button" class="side-item-btn" data-tab="perfil">👤 Perfil</button></li>
+                <li><button type="button" class="side-item-btn" data-tab="ranking">🏆 Ranking</button></li>
+                <li><button type="button" class="side-item-btn" data-tab="configuracoes">⚙️ Configurações</button></li>
+                <li><button type="button" class="side-item-btn" data-tab="mais">••• Mais</button></li>
+            </ul>
+        </div>
+
+        <div class="side-bottom">
+            <div class="premium-box">
+                <div class="premium-box-title">👑 Seja Premium!</div>
+                <div class="premium-box-sub">Desbloqueie recursos incríveis!</div>
+                <button type="button" class="premium-btn" data-go-tab="ranking">Saiba mais →</button>
+            </div>
+
+            <div class="online-pill" style="margin-bottom:6px;">
+                <div class="online-left"><span>⏱️</span><span>Tempo no site</span></div>
+                <strong id="js-site-timer" data-seconds="{{ tempo_ativo_segundos }}">{{ tempo_focado_str }}</strong>
+            </div>
+            <div class="online-pill">
+                <div class="online-left">
+                    <span class="dot-green"></span>
+                    <span>Online</span>
+                </div>
+                <form action="{% url 'logout' %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-mini-btn">Sair</button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <!-- BANNER SUPERIOR COMPARTILHADO -->
+        <section class="hero-banner{% if imagem_fundo_url %} has-custom-banner{% endif %}" id="js-hero-banner">
+            {% if imagem_fundo_url %}
+                {% if imagem_fundo_is_video %}
+                    <video class="hero-banner-video" autoplay muted loop playsinline preload="metadata">
+                        <source src="{{ imagem_fundo_url }}">
+                    </video>
+                    <div class="hero-banner-media-overlay"></div>
+                {% else %}
+                    <div class="hero-banner-image" style="background-image: url('{{ imagem_fundo_url }}');"></div>
+                    <div class="hero-banner-media-overlay"></div>
+                {% endif %}
+            {% endif %}
+            <div class="hero-user-group">
+                <div class="hero-avatar-box">
+                    {% if foto_perfil_url %}
+                        <img src="{{ foto_perfil_url }}" alt="{{ user.username }}" class="hero-avatar-img">
+                    {% else %}
+                        <div class="hero-avatar-fallback">{{ user.username|slice:":1"|upper }}</div>
+                    {% endif %}
+                    <span class="hero-online-dot" id="js-banner-green-dot"></span>
+                    <button type="button" class="hero-edit-circle" id="js-banner-avatar-edit" title="Editar foto de perfil" style="display:none;">✎</button>
+                </div>
+
+                <div>
+                    <div class="hero-name-line">
+                        <h1>{{ user.username }}</h1>
+                        <span class="hero-check-badge">✓</span>
+                    </div>
+                    <p class="hero-bio">{{ perfil.bio|default:"Sonhe. Planeje. Conquiste. " }}</p>
+                </div>
+            </div>
+
+            <div class="hero-top-actions" id="js-banner-inicio-actions">
+                <button type="button" class="icon-circle-btn" data-go-tab="ranking" title="Ranking & Conquistas">🔔</button>
+                <button type="button" class="icon-circle-btn" id="js-theme-toggle" title="Alternar tema">🌙</button>
+            </div>
+
+            <div class="hero-top-actions" id="js-banner-perfil-actions" style="display:none;">
+                <button type="button" class="btn-edit-banner" id="js-open-banner-form">🖼️ Editar Banner</button>
+            </div>
+        </section>
+
+        <!-- NAVEGAÇÃO MOBILE FIXA: disponível em todas as abas -->
+        <div class="mobile-topbar-row" id="js-mobile-topbar">
+            <button type="button" class="mobile-menu-btn" id="js-mobile-menu-btn" aria-label="Abrir menu" aria-controls="js-sidebar" aria-expanded="false">☰</button>
+            <span class="mobile-current-tab" id="js-mobile-current-tab">Início</span>
+        </div>
+
+        <!-- ABA INÍCIO -->
+        <div id="tab-inicio" class="tab-view active">
+            {% if messages %}
+                <div class="msg-toast-stack" id="js-msg-stack">
+                    {% for message in messages|slice:":1" %}
+                        <div class="msg-toast-item">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="inicio-layout">
+                <div class="inicio-left">
+                    <div class="date-card">
+                        <div class="date-icon-sq">📅</div>
+                        <div>
+                            <div id="js-full-date" class="date-sub">25 de Novembro de 2026</div>
+                            <div id="js-weekday-name" class="date-weekday">Quarta-feira</div>
+                            <div class="date-greet">Olá, {{ user.username }}! 👋</div>
+                        </div>
+                    </div>
+
+                    <div class="card-box">
+                        <div class="cal-top">
+                            <button type="button" id="js-prev-month" class="cal-arrow">‹</button>
+                            <div id="js-month-label" class="cal-title">Novembro de 2026</div>
+                            <button type="button" id="js-next-month" class="cal-arrow">›</button>
+                        </div>
+                        <div class="cal-dow">
+                            <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
+                        </div>
+                        <div id="js-cal-days" class="cal-days"></div>
+                    </div>
+
+                    <div class="motivate-card">
+                        <div>
+                            <h3>Você consegue!</h3>
+                            <p>Grandes conquistas começam com pequenos passos.</p>
+                        </div>
+                        <div style="font-size:28px;">🏆</div>
+                    
+
+                    </div>
+                </div>
+
+                <div class="inicio-right">
+                    <div class="card-box">
+                        <div class="tasks-panel-head">
+                            <div class="tasks-panel-title">
+                                <span class="tasks-check-icon">✓</span>
+                                <h2>Minhas Tarefas</h2>
+                            </div>
+                            <button type="button" class="see-all-btn" data-go-tab="agenda">Ver todas ›</button>
+                        </div>
+
+                        <div class="task-rows" id="js-inicio-task-list">
+                            {% for tarefa in tarefas|slice:":4" %}
+                                <div class="task-row-card" data-task-id="{{ tarefa.id }}">
+                                    <div class="task-row-left">
+                                        <a href="{% url 'concluir_tarefa' tarefa.id %}"
+                                           class="check-circle-btn js-toggle-task {% if tarefa.concluida %}completed{% endif %}"
+                                           data-task-id="{{ tarefa.id }}"
+                                           title="Marcar como concluída">
+                                            {% if tarefa.concluida %}✓{% endif %}
+                                        </a>
+                                        <div>
+                                            <div class="task-row-name {% if tarefa.concluida %}completed{% endif %}">
+                                                {{ tarefa.titulo }}
+                                            </div>
+                                            <div class="task-row-time">
+                                                🕒 {{ tarefa.data|date:"d/m/Y" }}{% if tarefa.horario %} • {{ tarefa.horario|time:"H:i" }}{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="task-row-right">
+                                        <span class="badge-status {% if tarefa.concluida %}completed{% endif %}">
+                                            {% if tarefa.concluida %}Concluída{% else %}Pendente{% endif %}
+                                        </span>
+                                        <details class="task-actions">
+                            <summary class="dots-del-btn" title="Opções da tarefa" aria-label="Opções da tarefa">⋮</summary>
+                            <div class="task-actions-menu">
+                                <a href="{% url 'editar_tarefa' tarefa.id %}">✏️ Editar tarefa</a>
+                                <form method="post" action="{% url 'excluir_tarefa' tarefa.id %}" onsubmit="return confirm('Tem certeza que deseja excluir esta tarefa?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-task-action">🗑️ Excluir tarefa</button>
+                                </form>
+                            </div>
+                        </details>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p style="color:var(--text-muted);font-size:13px;">Nenhuma tarefa cadastrada ainda. Use o botão + para adicionar.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mini-kpis-4">
+                        <div class="mini-kpi">
+                            <span class="tasks-check-icon">✓</span>
+                            <div>
+                                <div class="mini-kpi-num">{{ tarefas_hoje_count }}</div>
+                                <div class="mini-kpi-lbl">Tarefas hoje</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-kpi">
+                            <span class="tasks-check-icon" style="background:#22c55e;">✓</span>
+                            <div>
+                                <div class="mini-kpi-num" id="js-kpi-concluidas">{{ tarefas_concluidas_count }}</div>
+                                <div class="mini-kpi-lbl">Concluídas</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-kpi">
+                            <span style="font-size:20px;">🔥</span>
+                            <div>
+                                <div class="mini-kpi-num" id="js-kpi-produtividade">{{ produtividade_pct }}%</div>
+                                <div class="mini-kpi-lbl">Produtividade</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-kpi">
+                            <div style="width:100%;font-size:20px;color:#a855f7;text-align:right;">📈</div>
+                        </div>
+                    </div>
+
+                    <div class="card-box inicio-rank-card">
+                        <div class="inicio-rank-left">
+                            <img src="{% static ranking.rank_imagem %}" alt="{{ ranking.rank_nome }}" class="rank-emblem-md">
+                            <div>
+                                <div class="info-lbl-sm">Seu Rank Atual</div>
+                                <h3 style="margin:2px 0;">{{ ranking.rank_nome }} • <span data-current-points>{{ ranking.pontos }}</span> pts</h3>
+                                <p class="info-lbl-sm">{{ ranking.rank_desc }}</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-pill-edit" data-go-tab="ranking">Ver Ranking →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA PERFIL (REFERÊNCIA 1) -->
+        <div id="tab-perfil" class="tab-view">
+            <div class="perfil-layout">
+                <div class="perfil-col">
+                    <div class="card-box">
+                        <div class="box-header-row">
+                            <div class="box-header-title">
+                                <span>👤</span>
+                                <h2>Informações do Perfil</h2>
+                            </div>
+                            <button type="button" class="btn-pill-edit" id="js-btn-edit-info">✎ Editar</button>
+                        </div>
+
+                        <div class="info-list-row">
+                            <span>👤</span>
+                            <div>
+                                <div class="info-lbl-sm">Nome de Usuário</div>
+                                <div class="info-val-md">{{ user.username }}</div>
+                            </div>
+                        </div>
+
+                        <div class="info-list-row">
+                            <span>📈</span>
+                            <div>
+                                <div class="info-lbl-sm">Bio</div>
+                                <div class="info-val-md">{{ perfil.bio|default:"Sonhe. Planeje. Conquiste. " }}</div>
+                            </div>
+                        </div>
+
+                        <div class="info-list-row">
+                            <span>📅</span>
+                            <div>
+                                <div class="info-lbl-sm">Data de Registro</div>
+                                <div class="info-val-md">{{ user.date_joined|date:"d \d\e F \d\e Y" }}</div>
+                            </div>
+                        </div>
+
+                        <form method="POST" enctype="multipart/form-data" class="inline-edit-form" id="js-form-edit-info">
+                            {% csrf_token %}
+                            <input type="text" name="username" class="field-in" value="{{ user.username }}" placeholder="Nome de usuário" required>
+                            <input type="text" name="bio" class="field-in" value="{{ perfil.bio|default:'Sonhe. Planeje. Conquiste. ' }}" maxlength="160" placeholder="Bio">
+                            <label class="info-lbl-sm">Foto de Perfil</label>
+                            <input type="file" name="foto_perfil" accept="image/*" class="field-in">
+                            <button type="submit" class="btn-save-purple">Salvar Informações</button>
+                        </form>
+                    </div>
+
+                    <div class="card-box">
+                        <div class="box-header-row">
+                            <div class="box-header-title">
+                                <span>🥝</span>
+                                <h2>Sobre Você</h2>
+                            </div>
+                            <button type="button" class="btn-pill-edit" id="js-btn-edit-sobre">✎ Editar</button>
+                        </div>
+
+                        <p class="sobre-text">
+                            {{ perfil.sobre|default:"Olá! Eu sou o Akira, e adoro organizar minha vida! Sempre buscando evoluir e fazer o meu melhor. ✨" }}
+                        </p>
+
+                        <div class="tags-row">
+                            <span class="tag-chip">#Foco</span>
+                            <span class="tag-chip">#Produtividade</span>
+                            <span class="tag-chip">#Anime</span>
+                        </div>
+
+                        <form method="POST" class="inline-edit-form" id="js-form-edit-sobre">
+                            {% csrf_token %}
+                            <textarea name="sobre" rows="3" class="field-in" placeholder="Escreva sobre você...">{{ perfil.sobre }}</textarea>
+                            <button type="submit" class="btn-save-purple">Salvar Sobre Você</button>
+                        </form>
+                    </div>
+
+                    <div class="card-box" id="js-card-edit-banner" style="display:none;">
+                        <h3 style="margin-bottom:10px;">🖼️ Editar Banner do Perfil</h3>
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="file" name="imagem_fundo" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/ogg" class="field-in" required>
+                            <button type="submit" class="btn-save-purple">Atualizar Banner</button>
+                        </form>
+                    
+
+                    <div class="card-box">
+                        <div class="box-header-row">
+                            <div class="box-header-title">
+                                <img src="{% static ranking.rank_imagem %}" alt="{{ ranking.rank_nome }}" class="rank-badge-img">
+                                <h2>Rank Atual: {{ ranking.rank_nome }}</h2>
+                            </div>
+                            <button type="button" class="btn-pill-edit" data-go-tab="ranking">Ver Tabela</button>
+                        </div>
+
+                        <p class="info-lbl-sm" style="margin-top:6px;">{{ ranking.rank_desc }}</p>
+                        <p class="info-val-md" style="margin-top:8px;">⭐ <span data-current-points>{{ ranking.pontos }}</span> pontos</p>
+
+                        {% if ranking.rank_obtivel %}
+                            <div class="rank-progress-wrap">
+                                <div class="rank-progress-fill" style="width: {{ ranking.progresso_pct }}%;"></div>
+                            </div>
+                            <p class="info-lbl-sm" style="margin-top:6px;">
+                                {% if ranking.pontos_faltando > 0 %}
+                                    Faltam {{ ranking.pontos_faltando }} pts para {{ ranking.proximo_rank }}.
+                                {% else %}
+                                    Rank máximo obtível alcançado!
+                                {% endif %}
+                            </p>
+                        {% else %}
+                            <p class="info-lbl-sm" style="margin-top:6px;">Rank não obtível por pontos.</p>
+                        {% endif %}
+                    </div>
+
+
+                </div>
+                </div>
+
+                <div class="perfil-col">
+                    <div class="card-box">
+                        <div class="box-header-row">
+                            <div class="box-header-title">
+                                <span>📊</span>
+                                <h2>Suas Estatísticas</h2>
+                            </div>
+                        </div>
+
+                        <div class="stats-4-grid">
+                            <div class="stat-box-tile">
+                                <div>✅</div>
+                                <div class="stat-box-num">{{ tarefas_concluidas_count }}</div>
+                                <div class="stat-box-lbl">Tarefas Feitas</div>
+                            </div>
+                            <div class="stat-box-tile">
+                                <div>📅</div>
+                                <div class="stat-box-num">{{ dias_ativos|default:1 }}</div>
+                                <div class="stat-box-lbl">Dias Ativos</div>
+                            </div>
+                            <div class="stat-box-tile">
+                                <div>🔥</div>
+                                <div class="stat-box-num">{{ sequencia_dias }}</div>
+                                <div class="stat-box-lbl">Sequência</div>
+                            </div>
+                            <div class="stat-box-tile">
+                                <div>⭐</div>
+                                <div class="stat-box-num"><span data-current-points>{{ ranking.pontos }}</span></div>
+                                <div class="stat-box-lbl">Pontos</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-box">
+                        <div class="box-header-row">
+                            <div class="box-header-title">
+                                <span>🏆</span>
+                                <h2>Conquistas</h2>
+                            </div>
+                            <button type="button" class="see-all-btn" data-go-tab="ranking">Ver todas ›</button>
+                        </div>
+
+                        <div class="conquistas-4-grid" id="js-conquistas-grid">
+                            {% for c in conquistas %}
+                                <div class="conquista-tile" data-conquista-index="{{ forloop.counter0 }}" data-unlocked="{{ c.desbloqueada|yesno:'true,false' }}" style="{% if not c.desbloqueada %}opacity:0.48;filter:grayscale(0.75);{% else %}border-color:#a855f7;box-shadow:0 0 14px rgba(139,61,255,0.25);{% endif %}">
+                                    <div class="conquista-medal">{{ c.icone }}</div>
+                                    <div class="conquista-name">{{ c.nome }}</div>
+                                    <div class="conquista-sub">{{ c.desc }}</div>
+                                    <div class="conquista-sub js-conquista-progresso" style="margin-top:4px;color:{% if c.desbloqueada %}#4ade80{% else %}#c084fc{% endif %};font-weight:700;">{% if c.desbloqueada %}✓ Desbloqueada{% else %}{{ c.progresso }}{% endif %}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="card-box">
+                        <div class="box-header-row">
+                            <div class="box-header-title">
+                                <span>⚙️</span>
+                                <h2>Preferências</h2>
+                            </div>
+                            <button type="button" class="btn-pill-edit" id="js-btn-edit-prefs">✎ Editar</button>
+                        </div>
+
+                        <div class="prefs-row">
+                            <div class="pref-chip-box" id="js-pref-tema">🌙 Tema: Roxo</div>
+                            <div class="pref-chip-box">🌐 Idioma: Português (BR)</div>
+                            <div class="pref-chip-box" id="js-pref-notif">🔔 Notificações: Ativadas</div>
+                        </div>
+
+                        <div class="inline-edit-form" id="js-form-edit-prefs">
+                            <button type="button" class="btn-pill-edit" id="js-toggle-theme-pref" style="margin-right:8px;">Alternar Tema Claro/Roxo</button>
+                            <button type="button" class="btn-pill-edit" id="js-toggle-notif-pref">Alternar Notificações</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA AGENDA -->
+        <div id="tab-agenda" class="tab-view">
+            <div class="card-box" style="margin-bottom:18px;padding:24px;">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+                    <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#8b3dff,#a855f7);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;">✓</div>
+                    <div><h2 style="font-size:22px;margin:0;">Adicionar Tarefa</h2><p class="info-lbl-sm" style="margin-top:3px;">Planeje, organize e não se esqueça do que é importante!</p></div>
+                </div>
+                <form method="POST" id="js-form-nova-tarefa">
+                    {% csrf_token %}
+                    <input type="hidden" name="cadastrar_tarefa" value="1">
+                    <input type="hidden" name="categoria" id="js-input-categoria" value="Estudos">
+                    <label class="info-lbl-sm" style="display:block;margin-bottom:6px;font-weight:700;">✏️ Título da Tarefa</label>
+                    <input type="text" name="titulo" id="js-titulo-tarefa" maxlength="100" class="field-in" placeholder="Ex: Estudar matemática..." required>
+                    <div style="text-align:right;font-size:11px;color:var(--text-muted);margin:-6px 0 12px;"><span id="js-titulo-count">0</span>/100</div>
+                    <div class="task-form-three">
+                        <div><label class="info-lbl-sm">📅 Data</label><input type="date" name="data" value="{{ hoje_iso }}" class="field-in" required></div>
+                        <div><label class="info-lbl-sm">🕒 Horário (Opcional)</label><input type="time" name="horario" class="field-in"></div>
+                        <div><label class="info-lbl-sm">🚩 Prioridade</label><select name="prioridade" class="field-in"><option value="alta">🔴 Alta</option><option value="média" selected>🟡 Média</option><option value="baixa">🟢 Baixa</option><option value="urgente">🟣 Urgente</option></select></div>
+                    </div>
+                    <label class="info-lbl-sm" style="display:block;margin:8px 0;font-weight:700;">⊞ Categoria</label>
+                    <div class="cat-grid-6">
+                        <button type="button" class="cat-tile-btn active" data-cat="Estudos">🎓<span>Estudos</span></button>
+                        <button type="button" class="cat-tile-btn" data-cat="Trabalho">💼<span>Trabalho</span></button>
+                        <button type="button" class="cat-tile-btn" data-cat="Pessoal">👤<span>Pessoal</span></button>
+                        <button type="button" class="cat-tile-btn" data-cat="Saúde">🤍<span>Saúde</span></button>
+                        <button type="button" class="cat-tile-btn" data-cat="Lazer">🎮<span>Lazer</span></button>
+                        <button type="button" class="cat-tile-btn" data-cat="Outro">•••<span>Outro</span></button>
+                    </div>
+                    <div class="task-form-two">
+                        <div><label class="info-lbl-sm">📚 Matéria (Opcional)</label><select name="materia" class="field-in"><option value="">Sem matéria</option>{% for m in materias %}<option value="{{ m.id }}">{{ m.nome }}</option>{% endfor %}</select></div>
+                        <div><label class="info-lbl-sm">🏷️ Tipo</label><select name="tipo" class="field-in"><option value="Tarefa">Tarefa</option><option value="Trabalho">Trabalho</option><option value="Prova">Prova</option></select></div>
+                    </div>
+                    <label class="info-lbl-sm" style="display:block;margin-bottom:6px;font-weight:700;">☰ Descrição (Opcional)</label>
+                    <textarea name="descricao" id="js-desc-tarefa" maxlength="500" rows="2" class="field-in" style="height:auto;padding:10px 12px;resize:vertical;" placeholder="Adicione mais detalhes sobre sua tarefa..."></textarea>
+                    <div style="text-align:right;font-size:11px;color:var(--text-muted);margin:-6px 0 14px;"><span id="js-desc-count">0</span>/500</div>
+                    <div class="task-options-grid">
+                        <label><span>🔄 Repetir Tarefa<small>Diariamente, semanalmente...</small></span><input type="checkbox" name="repetir"></label>
+                        <label><span>🔔 Lembrete<small>Receba uma notificação</small></span><input type="checkbox" name="lembrete" checked></label>
+                        <label><span>⭐ Importante<small>Destaque sua tarefa</small></span><input type="checkbox" name="importante"></label>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;">
+                        <button type="button" data-go-tab="inicio" class="btn-pill-edit" style="padding:11px 20px;">✕ Cancelar</button>
+                        <button type="submit" class="btn-save-purple" style="width:auto;padding:11px 24px;">✓ Adicionar Tarefa</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-box">
+                <h2 style="margin-bottom:14px;">📋 Todas as Tarefas ({{ tarefas|length }})</h2>
+                <div class="task-rows">
+                    {% for tarefa in tarefas %}
+                    <div class="task-row-card">
+                        <div class="task-row-left">
+                            <a href="{% url 'concluir_tarefa' tarefa.id %}" class="check-circle-btn js-toggle-task {% if tarefa.concluida %}completed{% endif %}" data-task-id="{{ tarefa.id }}">{% if tarefa.concluida %}✓{% endif %}</a>
+                            <div><div class="task-row-name {% if tarefa.concluida %}completed{% endif %}">{{ tarefa.titulo }}</div><div class="task-row-time">{{ tarefa.data|date:"d/m/Y" }}{% if tarefa.horario %} • {{ tarefa.horario|time:"H:i" }}{% endif %}{% if tarefa.materia %} • {{ tarefa.materia.nome }}{% endif %}</div></div>
+                        </div>
+                        <div class="task-row-right"><span class="badge-status {% if tarefa.concluida %}completed{% endif %}">{% if tarefa.concluida %}Concluída{% else %}Pendente{% endif %}</span><details class="task-actions">
+                            <summary class="dots-del-btn" title="Opções da tarefa" aria-label="Opções da tarefa">⋮</summary>
+                            <div class="task-actions-menu">
+                                <a href="{% url 'editar_tarefa' tarefa.id %}">✏️ Editar tarefa</a>
+                                <form method="post" action="{% url 'excluir_tarefa' tarefa.id %}" onsubmit="return confirm('Tem certeza que deseja excluir esta tarefa?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-task-action">🗑️ Excluir tarefa</button>
+                                </form>
+                            </div>
+                        </details></div>
+                    </div>
+                    {% empty %}<p class="info-lbl-sm">Nenhuma tarefa cadastrada.</p>{% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA ESTATÍSTICAS -->
+        <div id="tab-estatisticas" class="tab-view">
+            <div class="card-box stats-heading">
+                <div style="display:flex;align-items:center;gap:14px;"><span style="font-size:26px;">📊</span><div><h2 style="margin:0;">Estatísticas</h2><p class="info-lbl-sm">Acompanhe seu progresso e veja como você está se saindo!</p></div></div>
+                <span class="tag-chip">📅 Últimos 30 dias</span>
+            </div>
+            <div class="stats-4-top stats-visual-grid">
+                <div class="card-box stats-visual-card"><div><strong>{{ tarefas_concluidas_count }}</strong><div class="info-lbl-sm">✓ Tarefas Concluídas</div></div><span class="stats-spark">⌁</span></div>
+                <div class="card-box stats-visual-card"><div><strong id="js-stats-tempo-focado">{{ tempo_focado_str }}</strong><div class="info-lbl-sm">🕒 Tempo Focado</div></div><span class="stats-spark">⌁</span></div>
+                <div class="card-box stats-visual-card"><div><strong>{{ sequencia_dias }}</strong><div class="info-lbl-sm">🔥 Sequência Atual</div></div><span class="stats-spark">⌁</span></div>
+                <div class="card-box stats-visual-card"><div><strong><span data-current-points>{{ ranking.pontos }}</span></strong><div class="info-lbl-sm">⭐ Pontos</div></div><span class="stats-spark">⌁</span></div>
+            </div>
+            <div class="stats-content-grid">
+                <div class="card-box"><div class="stats-card-title"><h3>📈 Seu Progresso</h3><span class="tag-chip">{{ produtividade_pct }}%</span></div>
+                    <div class="bars-week">{% for d in progresso_semanal %}<div class="bar-slot"><span style="font-size:11px;color:#d8b4fe;">{{ d.pct }}%</span><div class="bar-bg"><div class="bar-val" style="height:{{ d.pct }}%;"></div></div><span class="info-lbl-sm">{{ d.label }}</span></div>{% endfor %}</div>
+                </div>
+                <div class="card-box"><h3 style="margin-bottom:14px;">🏆 Categorias Mais Usadas</h3>
+                    <div class="stats-category-list">{% for cat in categorias_stats %}<div><span><i style="background:{{ cat.cor }};"></i>{{ cat.nome }}</span><strong>{{ cat.pct }}%</strong></div>{% endfor %}</div>
+                </div>
+                <div class="card-box"><h3 style="margin-bottom:14px;">📅 Resumo Mensal</h3>
+                    <div class="stats-summary-line"><span>✅ Tarefas Concluídas</span><strong>{{ tarefas_concluidas_count }} / {{ total_tarefas_count }}</strong></div><div class="stats-progress"><i style="width:{{ produtividade_pct }}%;"></i></div>
+                    <div class="stats-summary-line"><span>🕒 Horas Totais</span><strong id="js-stats-horas-totais">{{ tempo_focado_str }}</strong></div><div class="stats-progress"><i style="width:{{ horas_progresso_pct }}%;"></i></div>
+                    <div class="stats-summary-line"><span>⭐ Pontos Acumulados</span><strong><span data-current-points>{{ ranking.pontos }}</span> pts</strong></div><div class="stats-progress"><i style="width:{{ pontos_progresso_pct }}%;"></i></div>
+                </div>
+                <div class="card-box stats-best-day"><h3>🔥 Seu Melhor Dia</h3><div class="stats-best-icon">⭐</div><strong>{{ melhor_dia_nome }}</strong><span class="info-lbl-sm">{{ melhor_dia_pct }}% de tarefas concluídas</span></div>
+            </div>
+        </div>
+
+        <!-- ABA RANKING -->
+        <div id="tab-ranking" class="tab-view">
+            <div class="card-box" style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:28px;">🏆</span>
+                    <div>
+                        <h2 style="margin:0;">Ranking</h2>
+                        <p class="info-lbl-sm" style="margin-top:2px;">Veja quem está no topo da nossa comunidade!</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <span class="tag-chip" style="background:rgba(139,61,255,0.28); border-color:rgba(168,85,247,0.5);">🌐 Geral</span>
+                    <span class="tag-chip">👥 Amigos</span>
+                    <span class="tag-chip">📅 Semanal</span>
+                    <span class="tag-chip">🗓️ Mensal</span>
+                </div>
+            </div>
+
+            <div class="ranking-main-split">
+                <div class="card-box">
+                    <div class="rank-row" style="opacity:0.75; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                        <strong>#</strong>
+                        <span>Usuário</span>
+                        <span>Nível</span>
+                        <strong>Pontos</strong>
+                    </div>
+
+                    {% for item in leaderboard %}
+                        <div class="rank-row {% if item.is_current %}me{% endif %}">
+                            <strong>{{ item.posicao }} 👑</strong>
+                            <span style="display:flex; align-items:center; gap:8px;">
+                                {% if item.foto_url %}
+                                    <img src="{{ item.foto_url }}" alt="{{ item.username }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
+                                {% endif %}
+                                <strong>{{ item.username }}</strong>
+                            </span>
+                            <span class="tag-chip">
+                                {% if item.rank_imagem %}
+                                    <img src="{% static item.rank_imagem %}" alt="{{ item.rank_nome }}" class="rank-badge-img" style="width:20px;height:20px;">
+                                {% endif %}
+                                {{ item.rank_nome }}
+                            </span>
+                            <strong>⭐ {{ item.pontos }}</strong>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    <div class="card-box" style="text-align:center;">
+                        <img src="{% static ranking.rank_imagem %}" alt="{{ ranking.rank_nome }}" class="rank-badge-img" style="width:68px;height:68px;margin-bottom:8px;">
+                        <h3>{{ ranking.rank_nome }}</h3>
+                        <p class="info-lbl-sm" style="margin-top:4px;">{{ ranking.rank_desc }}</p>
+                        <div class="rank-admin-alert" style="justify-content:center; text-align:center;">
+                            <span class="info-lbl-sm">
+                                {% if ranking.rank_obtivel and ranking.pontos_faltando > 0 %}
+                                    Faltam {{ ranking.pontos_faltando }} pts para {{ ranking.proximo_rank }}.
+                                {% elif ranking.rank_obtivel %}
+                                    Nível máximo alcançado!
+                                {% else %}
+                                    {{ ranking.rank_desc }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-box" id="ranks-tabela-secao">
+                        <h3 style="margin-bottom:10px;">⭐ Níveis do Ranking</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            {% for rk in ranking.ranks_trilha %}
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <img src="{% static rk.imagem %}" alt="{{ rk.nome }}" class="rank-badge-img" style="width:26px;height:26px;">
+                                    <div>
+                                        <div style="font-size:13px; font-weight:600;">{{ rk.nome }}</div>
+                                        <div class="info-lbl-sm">{{ rk.desc }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if ranking.rank_admin_info %}
+                            <div class="rank-admin-alert">
+                                <img src="{% static ranking.rank_admin_info.imagem %}" alt="{{ ranking.rank_admin_info.nome }}" class="rank-badge-img">
+                                <div>
+                                    <strong>{{ ranking.rank_admin_info.nome }} — {{ ranking.rank_admin_info.faixa_pontos }}</strong>
+                                    <p class="info-lbl-sm">{{ ranking.rank_admin_info.desc }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA CONFIGURAÇÕES -->
+        <div id="tab-configuracoes" class="tab-view">
+            <div class="card-box" style="margin-bottom:16px;">
+                <h2 style="margin-bottom:12px;">⚙️ Configurações</h2>
+                <button type="button" class="btn-save-purple" id="js-settings-theme-btn">Alternar Tema Claro / Escuro</button>
+            </div>
+
+            <div class="settings-account-grid" style="margin-bottom:16px;">
+                <div class="card-box" id="secao-sua-conta">
+                    <div class="box-header-row" style="margin-bottom:14px;"><div class="box-header-title"><span>👤</span><h2>Sua Conta</h2></div><span class="tag-chip">Ativa</span></div>
+                    <div class="info-list-row settings-info-row"><span class="settings-icon">🪪</span><div><div class="info-lbl-sm">Nome de Usuário</div><div class="info-val-md">{{ user.username }}</div></div></div>
+                    <div class="info-list-row settings-info-row"><span class="settings-icon">🏅</span><div><div class="info-lbl-sm">Rank Atual</div><div class="info-val-md">{{ ranking.rank_nome }} • <span data-current-points>{{ ranking.pontos }}</span> pts</div></div></div>
+                    <div class="info-list-row settings-info-row"><span class="settings-icon">📅</span><div><div class="info-lbl-sm">Data de Registro</div><div class="info-val-md">{{ user.date_joined|date:"d \\d\\e F \\d\\e Y" }}</div></div></div>
+                </div>
+                <div class="card-box" id="secao-alterar-senha">
+                    <div class="box-header-row" style="margin-bottom:8px;"><div class="box-header-title"><span>🔒</span><h2>Alterar Senha</h2></div></div>
+                    <p class="info-lbl-sm" style="margin-bottom:14px;">Atualize sua senha de acesso com segurança.</p>
+                    <form method="POST" action="{% url 'dashboard' %}" class="password-change-form">
+                        {% csrf_token %}<input type="hidden" name="alterar_senha" value="1">
+                        <input type="password" name="senha_atual" class="field-in" placeholder="Senha atual" autocomplete="current-password" required>
+                        <input type="password" name="nova_senha" class="field-in" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password" minlength="6" required>
+                        <input type="password" name="confirmar_senha" class="field-in" placeholder="Confirmar nova senha" autocomplete="new-password" minlength="6" required>
+                        <button type="submit" class="btn-save-purple">Salvar Nova Senha</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-box" id="config-ranks-showcase">
+                <div style="text-align:center; margin-bottom:14px;">
+                    <h2>🏆 Ranks & Níveis</h2>
+                    <p class="info-lbl-sm" style="margin-top:4px;">Complete tarefas, acumule pontos e suba de nível!</p>
+                </div>
+
+                <div class="ranks-tier-strip">
+                    {% for rk in ranking.ranks_trilha %}
+                        <div class="rank-tier-tile {% if ranking.rank_slug == rk.slug %}is-current{% endif %}">
+                            <img src="{% static rk.imagem %}" alt="{{ rk.nome }}" class="rank-emblem-md">
+                            <div class="rank-tier-name">{{ rk.nome }}</div>
+                            <div class="rank-tier-pts">{{ rk.faixa_pontos }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="ranking-bottom-grid" style="margin-top:16px;">
+                    <div class="card-box" style="background:var(--bg-card-2);">
+                        <div class="info-lbl-sm" style="margin-bottom:10px;">👑 Top 1 do Ranking</div>
+                        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                            {% if top1_usuario and top1_usuario.foto_url %}
+                                <img src="{{ top1_usuario.foto_url }}" alt="{{ top1_usuario.username }}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #a855f7;">
+                            {% else %}
+                                <div style="width:64px;height:64px;border-radius:50%;background:rgba(139,61,255,0.28);display:flex;align-items:center;justify-content:center;font-size:26px;">👤</div>
+                            {% endif %}
+                            <div>
+                                <div style="font-size:17px;font-weight:700;">{{ top1_usuario.username|default:"—" }}</div>
+                                <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                                    {% if top1_usuario %}<img src="{% static top1_usuario.rank_imagem %}" alt="{{ top1_usuario.rank_nome }}" class="rank-emblem-img" style="width:24px;height:24px;">{% endif %}
+                                    <strong>{{ top1_usuario.rank_nome|default:"Sem ranking" }}</strong>
+                                </div>
+                                <div class="info-lbl-sm" style="margin-top:4px;">⭐ {{ top1_usuario.pontos|default:0 }} pontos</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-box" style="background:var(--bg-card-2);">
+                        <h3 style="margin-bottom:10px;">⭐ Benefícios dos Ranks</h3>
+                        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+                            <div>✓ Emblemas exclusivos</div>
+                            <div>✓ Destaque no ranking</div>
+                            <div>✓ Cores especiais no perfil</div>
+                            <div>✓ Recompensas únicas</div>
+                        </div>
+                        {% if ranking.rank_admin_info %}
+                            <div class="rank-admin-alert" style="margin-top:12px;">
+                                <img src="{% static ranking.rank_admin_info.imagem %}" alt="{{ ranking.rank_admin_info.nome }}" class="rank-emblem-img">
+                                <div>
+                                    <strong>{{ ranking.rank_admin_info.nome }}</strong>
+                                    <p class="info-lbl-sm">{{ ranking.rank_admin_info.desc }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA MAIS (MATÉRIAS) -->
+        <div id="tab-mais" class="tab-view">
+            <div class="card-box">
+                <h2 style="margin-bottom:12px;">📚 Cadastrar Matéria</h2>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="cadastrar_materia" value="1">
+                    <input type="text" name="nome" class="field-in" placeholder="Nome da matéria" required>
+                    <input type="text" name="professor" class="field-in" placeholder="Professor (opcional)">
+                    <button type="submit" class="btn-save-purple">Salvar Matéria</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <button type="button" class="fab-plus" data-go-tab="agenda" title="Nova Tarefa">+</button>
+
+    <script>
+        (function () {
+            const tabButtons = document.querySelectorAll(".side-item-btn[data-tab]");
+            const tabViews = document.querySelectorAll(".tab-view");
+            const goTabButtons = document.querySelectorAll("[data-go-tab]");
+
+            const bannerAvatarEdit = document.getElementById("js-banner-avatar-edit");
+            const bannerInicioActions = document.getElementById("js-banner-inicio-actions");
+            const bannerPerfilActions = document.getElementById("js-banner-perfil-actions");
+
+            function openTab(tabName) {
+                tabViews.forEach(v => v.classList.remove("active"));
+                tabButtons.forEach(b => b.classList.remove("active"));
+
+                const target = document.getElementById("tab-" + tabName);
+                if (target) target.classList.add("active");
+
+                const sideBtn = document.querySelector(`.side-item-btn[data-tab="${tabName}"]`);
+                if (sideBtn) sideBtn.classList.add("active");
+
+                const mobileTabLabel = document.getElementById("js-mobile-current-tab");
+                if (mobileTabLabel && sideBtn) mobileTabLabel.textContent = sideBtn.textContent.trim();
+
+                const isPerfil = tabName === "perfil";
+                if (bannerAvatarEdit) bannerAvatarEdit.style.display = isPerfil ? "flex" : "none";
+                if (bannerInicioActions) bannerInicioActions.style.display = isPerfil ? "none" : "flex";
+                if (bannerPerfilActions) bannerPerfilActions.style.display = isPerfil ? "flex" : "none";
+            }
+
+            tabButtons.forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.tab)));
+            goTabButtons.forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.goTab)));
+
+            // Toggle forms inside Perfil
+            const bindToggle = (btnId, boxId) => {
+                const b = document.getElementById(btnId);
+                const box = document.getElementById(boxId);
+                if (b && box) b.addEventListener("click", () => box.classList.toggle("open"));
+            };
+            bindToggle("js-btn-edit-info", "js-form-edit-info");
+            bindToggle("js-btn-edit-sobre", "js-form-edit-sobre");
+            bindToggle("js-btn-edit-prefs", "js-form-edit-prefs");
+            if (bannerAvatarEdit) {
+                bannerAvatarEdit.addEventListener("click", () => {
+                    const box = document.getElementById("js-form-edit-info");
+                    if (box) box.classList.add("open");
+                });
+            }
+            const openBannerBtn = document.getElementById("js-open-banner-form");
+            const bannerCardBox = document.getElementById("js-card-edit-banner");
+            if (openBannerBtn && bannerCardBox) {
+                openBannerBtn.addEventListener("click", () => {
+                    bannerCardBox.style.display = bannerCardBox.style.display === "none" ? "block" : "none";
+                });
+            }
+
+            // Theme toggle
+            function toggleTheme() {
+                document.body.classList.toggle("theme-light");
+                const isLight = document.body.classList.contains("theme-light");
+                const prefTema = document.getElementById("js-pref-tema");
+                if (prefTema) prefTema.textContent = isLight ? "☀️ Tema: Claro" : "🌙 Tema: Roxo";
+            }
+            const themeBtn = document.getElementById("js-theme-toggle");
+            const themePrefBtn = document.getElementById("js-toggle-theme-pref");
+            const settingsThemeBtn = document.getElementById("js-settings-theme-btn");
+            if (themeBtn) themeBtn.addEventListener("click", toggleTheme);
+            if (themePrefBtn) themePrefBtn.addEventListener("click", toggleTheme);
+            if (settingsThemeBtn) settingsThemeBtn.addEventListener("click", toggleTheme);
+
+            const notifPrefBtn = document.getElementById("js-toggle-notif-pref");
+            const prefNotif = document.getElementById("js-pref-notif");
+            if (notifPrefBtn && prefNotif) {
+                notifPrefBtn.addEventListener("click", () => {
+                    const active = prefNotif.textContent.includes("Ativadas");
+                    prefNotif.textContent = active ? "🔕 Notificações: Desativadas" : "🔔 Notificações: Ativadas";
+                });
+            }
+
+            // Mark tasks complete directly on Inicio (and sync via fetch)
+            function atualizarConquistas(lista) {
+                if (!Array.isArray(lista)) return;
+                lista.forEach((c, i) => {
+                    const tile = document.querySelector(`[data-conquista-index="${i}"]`);
+                    if (!tile) return;
+                    tile.style.opacity = c.desbloqueada ? "1" : "0.48";
+                    tile.style.filter = c.desbloqueada ? "none" : "grayscale(0.75)";
+                    tile.style.borderColor = c.desbloqueada ? "#a855f7" : "rgba(255,255,255,0.05)";
+                    tile.style.boxShadow = c.desbloqueada ? "0 0 14px rgba(139,61,255,0.25)" : "none";
+                    const progress = tile.querySelector(".js-conquista-progresso");
+                    if (progress) {
+                        progress.textContent = c.desbloqueada ? "✓ Desbloqueada" : c.progresso;
+                        progress.style.color = c.desbloqueada ? "#4ade80" : "#c084fc";
+                    }
+                });
+            }
+
+            document.querySelectorAll(".js-toggle-task").forEach(link => {
+                link.addEventListener("click", function (e) {
+                    const href = this.getAttribute("href");
+                    const card = this.closest(".task-row-card");
+                    e.preventDefault();
+                    fetch(href, { method: "GET", credentials: "same-origin", headers: { "X-Requested-With": "XMLHttpRequest" } })
+                        .then(r => r.json()).then(data => {
+                            if (!data.ok) return;
+                            this.classList.toggle("completed", data.concluida);
+                            this.textContent = data.concluida ? "✓" : "";
+                            const titleEl = card && card.querySelector(".task-row-name");
+                            const badgeEl = card && card.querySelector(".badge-status");
+                            if (titleEl) titleEl.classList.toggle("completed", data.concluida);
+                            if (badgeEl) {
+                                badgeEl.classList.toggle("completed", data.concluida);
+                                badgeEl.textContent = data.concluida ? "Concluída" : "Pendente";
+                            }
+                            const kpiConc = document.getElementById("js-kpi-concluidas");
+                            const kpiProd = document.getElementById("js-kpi-produtividade");
+                            if (kpiConc) kpiConc.textContent = data.concluidas_count;
+                            if (kpiProd) kpiProd.textContent = data.produtividade_pct + "%";
+                            document.querySelectorAll("[data-current-points]").forEach(el => el.textContent = data.pontos);
+                            atualizarConquistas(data.conquistas);
+                        }).catch((erro) => {
+                            console.error("Não foi possível atualizar o status da tarefa:", erro);
+                            // Não redireciona para a URL protegida: uma falha temporária
+                            // de rede ou uma resposta HTML não deve parecer um logout.
+                        });
+                });
+            });
+
+            (function iniciarContadorAtividade() {
+                const timerEl = document.getElementById("js-site-timer");
+                if (!timerEl) return;
+                let totalSegundos = parseInt(timerEl.dataset.seconds || "0", 10) || 0;
+                let bufferNaoSalvo = 0;
+                let ultimoTick = Date.now();
+                function formatar(seg) {
+                    const h = Math.floor(seg / 3600), m = Math.floor((seg % 3600) / 60), s = seg % 60;
+                    return `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+                }
+                function csrf() {
+                    const m = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+                    return m ? decodeURIComponent(m[1]) : "";
+                }
+                function sincronizarTempo() {
+                    if (bufferNaoSalvo <= 0) return;
+                    const enviar = Math.min(bufferNaoSalvo, 120);
+                    bufferNaoSalvo -= enviar;
+                    fetch("{% url 'registrar_tempo_atividade' %}", {
+                        method: "POST", credentials: "same-origin", keepalive: true,
+                        headers: { "Content-Type": "application/json", "X-CSRFToken": csrf() },
+                        body: JSON.stringify({ segundos: enviar })
+                    }).then(r => r.json()).then(data => {
+                        if (!data.ok) return;
+                        const a = document.getElementById("js-stats-tempo-focado");
+                        const b = document.getElementById("js-stats-horas-totais");
+                        if (a) a.textContent = data.tempo_focado_str;
+                        if (b) b.textContent = data.tempo_focado_str;
+                        atualizarConquistas(data.conquistas);
+                    }).catch(() => { bufferNaoSalvo += enviar; });
+                }
+                timerEl.textContent = formatar(totalSegundos);
+                setInterval(() => {
+                    const now = Date.now();
+                    if (!document.hidden) {
+                        const delta = Math.max(0, Math.min(2, Math.floor((now - ultimoTick) / 1000)));
+                        totalSegundos += delta;
+                        bufferNaoSalvo += delta;
+                        timerEl.textContent = formatar(totalSegundos);
+                    }
+                    ultimoTick = now;
+                }, 1000);
+                setInterval(sincronizarTempo, 30000);
+                document.addEventListener("visibilitychange", () => {
+                    ultimoTick = Date.now();
+                    if (document.hidden) sincronizarTempo();
+                });
+                window.addEventListener("pagehide", sincronizarTempo);
+                window.addEventListener("beforeunload", sincronizarTempo);
+            })();
+
+            // Calendar
+            const meses = [
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            ];
+            const diasSemana = [
+                "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
+                "Quinta-feira", "Sexta-feira", "Sábado"
+            ];
+
+            const hoje = new Date();
+            let selDate = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+            let viewMonth = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+            function renderCal() {
+                document.getElementById("js-full-date").textContent =
+                    `${selDate.getDate()} de ${meses[selDate.getMonth()]} de ${selDate.getFullYear()}`;
+                document.getElementById("js-weekday-name").textContent = diasSemana[selDate.getDay()];
+
+                const y = viewMonth.getFullYear();
+                const m = viewMonth.getMonth();
+                document.getElementById("js-month-label").textContent = `${meses[m]} de ${y}`;
+
+                const daysGrid = document.getElementById("js-cal-days");
+                daysGrid.innerHTML = "";
+
+                let startOffset = new Date(y, m, 1).getDay() - 1;
+                if (startOffset < 0) startOffset = 6;
+
+                const lastDay = new Date(y, m + 1, 0).getDate();
+                const prevLast = new Date(y, m, 0).getDate();
+
+                for (let i = startOffset - 1; i >= 0; i--) {
+                    const el = document.createElement("div");
+                    el.className = "cal-day faded";
+                    el.textContent = prevLast - i;
+                    daysGrid.appendChild(el);
+                }
+
+                for (let d = 1; d <= lastDay; d++) {
+                    const el = document.createElement("div");
+                    el.className = "cal-day";
+                    el.textContent = d;
+                    if (selDate.getFullYear() === y && selDate.getMonth() === m && selDate.getDate() === d) {
+                        el.classList.add("selected");
+                    }
+                    el.addEventListener("click", () => {
+                        selDate = new Date(y, m, d);
+                        renderCal();
+                    });
+                    daysGrid.appendChild(el);
+                }
+            }
+
+            document.getElementById("js-prev-month").addEventListener("click", () => {
+                viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1);
+                renderCal();
+            });
+            document.getElementById("js-next-month").addEventListener("click", () => {
+                viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1);
+                renderCal();
+            });
+
+            renderCal();
+        
+            // Mobile sidebar drawer toggle
+            const sidebarEl = document.querySelector(".sidebar");
+            const mobileMenuBtn = document.getElementById("js-mobile-menu-btn");
+            const sidebarBackdrop = document.getElementById("js-sidebar-backdrop");
+            function closeMobileSidebar() {
+                if (sidebarEl) sidebarEl.classList.remove("open");
+                if (sidebarBackdrop) sidebarBackdrop.classList.remove("open");
+                if (mobileMenuBtn) mobileMenuBtn.setAttribute("aria-expanded", "false");
+            }
+            if (mobileMenuBtn && sidebarEl) {
+                mobileMenuBtn.addEventListener("click", () => {
+                    const isOpen = sidebarEl.classList.toggle("open");
+                    if (sidebarBackdrop) sidebarBackdrop.classList.toggle("open", isOpen);
+                    mobileMenuBtn.setAttribute("aria-expanded", String(isOpen));
+                });
+            }
+            if (sidebarBackdrop) {
+                sidebarBackdrop.addEventListener("click", closeMobileSidebar);
+            }
+            tabButtons.forEach(btn => btn.addEventListener("click", closeMobileSidebar));
+            goTabButtons.forEach(btn => btn.addEventListener("click", closeMobileSidebar));
+
+            // Password form toggle
+            bindToggle("js-btn-edit-senha", "js-form-edit-senha");
+
+        
+
+            // Seleção da categoria e contadores do formulário de tarefa.
+            const catInput = document.getElementById("js-input-categoria");
+            document.querySelectorAll(".cat-tile-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".cat-tile-btn").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    if (catInput) catInput.value = btn.dataset.cat || "Estudos";
+                });
+            });
+            const tituloIn = document.getElementById("js-titulo-tarefa");
+            const tituloCnt = document.getElementById("js-titulo-count");
+            if (tituloIn && tituloCnt) {
+                tituloIn.addEventListener("input", () => { tituloCnt.textContent = tituloIn.value.length; });
+            }
+            const descIn = document.getElementById("js-desc-tarefa");
+            const descCnt = document.getElementById("js-desc-count");
+            if (descIn && descCnt) {
+                descIn.addEventListener("input", () => { descCnt.textContent = descIn.value.length; });
+            }
+
+            const msgStack = document.getElementById("js-msg-stack");
+            if (msgStack) {
+                setTimeout(() => {
+                    msgStack.style.opacity = "0";
+                    msgStack.style.transition = "opacity 0.35s ease";
+                    setTimeout(() => { msgStack.style.display = "none"; }, 360);
+                }, 3500);
+            }
+
+        })();
+    
+        function abrirRankingNaTabela() {
+            const btn = document.querySelector('.side-item-btn[data-tab="ranking"]');
+            if (btn) btn.click();
+            setTimeout(() => {
+                const sec = document.getElementById('ranks-tabela-secao');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 80);
+        }
+        function filtrarRankingVisual(el, mode) {
+            document.querySelectorAll('.ranking-pill-btn').forEach(b => b.classList.remove('active'));
+            if (el) el.classList.add('active');
+        }
+
+        // Atualiza a dashboard logo após a meia-noite para retirar das listas
+        // as tarefas cuja data já terminou (sem apagar o histórico ou o XP).
+        (function atualizarTarefasNaViradaDoDia() {
+            const agora = new Date();
+            const meiaNoite = new Date(agora);
+            meiaNoite.setHours(24, 0, 2, 0);
+            const atraso = Math.max(1000, meiaNoite.getTime() - agora.getTime());
+            window.setTimeout(() => window.location.reload(), atraso);
+        })();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar conta — KIWI</title>
+    <link rel="stylesheet" href="{% static 'tarefas/cadastro.css' %}">
+</head>
+<body>
+<div class="container-split">
+    <section class="left-auth-side">
+        <div class="brand-name">KIWI</div>
+        <div class="auth-card">
+            <div class="eyebrow">AGENDA ESCOLAR</div>
+            <h1>Crie sua conta</h1>
+            <p class="subtitle">Comece a organizar sua rotina.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="id_username">Nome do usuário</label>
+                {{ form.username }}
+                <label for="id_password1">Senha</label>
+                {{ form.password1 }}
+                <label for="id_password2">Confirmar senha</label>
+                {{ form.password2 }}
+                <button type="submit">Cadastrar</button>
+                {% if form.non_field_errors %}
+                    <div class="auth-error">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    {% if field.errors %}
+                        <div class="auth-error">{{ field.label }}: {{ field.errors|striptags }}</div>
+                    {% endif %}
+                {% endfor %}
+            </form>
+            <p class="auth-footer-link">Já possui uma conta? <a href="{% url 'login' %}">Entrar</a></p>
+        </div>
+        <div class="legal-line">Sua rotina escolar em um só lugar.</div>
+    </section>
+    <aside class="right-promo-side">
+        <div class="promo-orb orb-one"></div>
+        <div class="promo-orb orb-two"></div>
+        <div class="promo-content">
+            <span>UM NOVO COMEÇO</span>
+            <h2>Organize<br>suas ideias.<br>Vá mais longe.</h2>
+            <p>Planejamento simples para grandes conquistas.</p>
+        </div>
+    </aside>
+</div>
+</body>
+</html>
